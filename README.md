@@ -12,8 +12,8 @@ would like to trigger reaction manually sometimes with additional args.
         });
 
         const disposerAndTrigger = reactionWithManualTrigger(
-            () => autoArgs.marker,
-            (autoArg, manualArg: string | undefined) => {
+            (manualArg: string | undefined) => [autoArgs.marker, manualArg],
+            (args) => {
                 // `manualArg` arg is only passed during manual trigger 
                 //...
             }

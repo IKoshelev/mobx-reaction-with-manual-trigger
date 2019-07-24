@@ -7,8 +7,8 @@ type  ManualTrigger<T> = {
 export type ReactionDisposerAndManualTrigger<T> = IReactionDisposer & ManualTrigger<T>;
 
 export function reactionWithManualTrigger<TAutomaticArg, TManualArg>(
-    expression: (r: IReactionPublic) => TAutomaticArg, 
-    effect: (autoArg: TAutomaticArg, manualArg: TManualArg | undefined,  r: IReactionPublic) => void, 
+    expression: ( manualArg: TManualArg | undefined, r: IReactionPublic) => TAutomaticArg, 
+    effect: (autoArg: TAutomaticArg, r: IReactionPublic) => void, 
     opts?: IReactionOptions): ReactionDisposerAndManualTrigger<TManualArg> {
 
         let lastProcessedManualArg:TManualArg | undefined; 
@@ -17,24 +17,15 @@ export function reactionWithManualTrigger<TAutomaticArg, TManualArg>(
         });
 
         const disposer: Partial<ReactionDisposerAndManualTrigger<TManualArg>> 
-            = reaction((r: IReactionPublic) => {
-
-            const args: {
-                autoArg: TAutomaticArg,
-                manualArg?: TManualArg
-            } = {
-                autoArg: expression(r)
-            }
-            
+            = reaction(
+        (r: IReactionPublic) => {
             if(observables.lastSeenManualArg !== lastProcessedManualArg) {
-                args.manualArg = lastProcessedManualArg = observables.lastSeenManualArg;
+                lastProcessedManualArg = observables.lastSeenManualArg;
+                return expression(lastProcessedManualArg, r);
             }
-
-            return args;
+            return expression(undefined, r);
         },
-        (args, r: IReactionPublic)=>{
-            effect(args.autoArg, args.manualArg, r);
-        },
+        effect,
         opts);
 
         disposer.triggerManaully = action((manualArg: TManualArg) => {

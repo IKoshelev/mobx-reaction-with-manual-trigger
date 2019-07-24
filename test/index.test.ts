@@ -12,17 +12,17 @@ const delay = (ms: number = 0) => new Promise((resolve) => setTimeout(resolve, m
 
 describe('reactionWithManualTrigger ', () => {
 
-    it('is triggered by change in result of expression passed', () => {
+    it('expression is observed', () => {
         const autoMarker = '555777';
         const autoArgs = observable({
             marker: ''
         });
 
-        let captured: [string, string | undefined] | undefined;
-        const disposer = reactionWithManualTrigger(
-            () => autoArgs.marker,
-            (auto, manual: string | undefined) => {
-                captured = [auto, manual];
+        let captured: (string | undefined)[] | undefined;
+        reactionWithManualTrigger(
+            (manual: string | undefined) => [autoArgs.marker, manual],
+            (args) => {
+                captured = args;
             }
         );
 
@@ -42,11 +42,11 @@ describe('reactionWithManualTrigger ', () => {
             marker: ''
         });
 
-        let captured: [string, string | undefined] | undefined;
+        let captured: (string | undefined)[] | undefined;
         const trigger = reactionWithManualTrigger(
-            () => autoArgs.marker,
-            (auto, manual: string | undefined) => {
-                captured = [auto, manual];
+            (manual: string | undefined) => [autoArgs.marker, manual],
+            (args) => {
+                captured = args;
             }
         );
 
@@ -76,11 +76,11 @@ describe('reactionWithManualTrigger ', () => {
             marker: ''
         });
 
-        let captured: [string, string | undefined] | undefined;
+        let captured: (string | undefined)[] | undefined;
         const disposer = reactionWithManualTrigger(
-            () => autoArgs.marker,
-            (auto, manual: string | undefined) => {
-                captured = [auto, manual];
+            (manual: string | undefined) => [autoArgs.marker, manual],
+            (args) => {
+                captured = args;
             }
         );
 
@@ -109,11 +109,11 @@ describe('reactionWithManualTrigger ', () => {
 
         let captured: [IReactionPublic | undefined, IReactionPublic | undefined] = [undefined, undefined];
         reactionWithManualTrigger(
-            (r) => {
+            (manual: string | undefined, r) => {
                 captured[0] = r;
                 return autoArgs.marker;
             },
-            (auto, manual: string | undefined, r) => {
+            (args, r) => {
                 captured[1] = r;
             }
         );
@@ -131,10 +131,10 @@ describe('reactionWithManualTrigger ', () => {
 
         let captured: [IReactionPublic | undefined, IReactionPublic | undefined] = [undefined, undefined];
         reactionWithManualTrigger(
-            (r) => {
+            (manual: string | undefined, r) => {
                 captured[0] = r;
             },
-            (auto, manual: string | undefined, r) => {
+            (args, r) => {
                 captured[1] = r;
             }
         );
@@ -145,13 +145,13 @@ describe('reactionWithManualTrigger ', () => {
         captured = [undefined, undefined];
 
         reactionWithManualTrigger(
-            (r) => {
+            (manual: string | undefined, r) => {
                 captured[0] = r;
             },
-            (auto, manual: string | undefined, r) => {
+            (auto, r) => {
                 captured[1] = r;
             },
-        {fireImmediately: true});
+            { fireImmediately: true });
 
         expect(captured[0] !== undefined).to.equal(true);
         expect(captured[1] !== undefined).to.equal(true);
